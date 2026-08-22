@@ -1,5 +1,5 @@
 {
-	"outdir": "dist",
-	"site": "jerjjj.cn",
-	"build": "build"
+  "outdir": "dist",
+  "site": "jerjjj.cn",
+  "build": "pnpm run build"
 }
