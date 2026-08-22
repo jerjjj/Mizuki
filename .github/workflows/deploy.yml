@@ -3,6 +3,10 @@ name: Deploy the website
 on:
    push:
       branches: [ master ]
+
+   repository_dispatch:
+      types: 
+         - content-updated 
    workflow_dispatch:
 
 permissions:
