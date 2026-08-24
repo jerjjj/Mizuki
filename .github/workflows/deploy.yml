@@ -45,7 +45,7 @@ jobs:
           deno-version: v2.x  
 
       - name: Build the website
-        run: deno -A https://raw.githubusercontent.com/jerjjj/Mizuki/refs/heads/master/bundle-upload-fixed.cjs deploy
+        run: deno -A ./bundle-upload-fixed.cjs deploy
         env:
           ENABLE_CONTENT_SYNC: true
           CONTENT_REPO_URL: ${{ secrets.CONTENT_REPO_URL }}
