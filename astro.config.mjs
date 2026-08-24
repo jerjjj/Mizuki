@@ -50,6 +50,15 @@ import { remarkWikiLink } from "./src/plugins/remark-wiki-link.mjs";
 import { resolveFontMode } from "./src/utils/fontMode.ts";
 
 const customFontsEnabled = resolveFontMode(siteConfig) === "custom";
+// Fontsource lxgw-wenkai 5.3.0, weight 500; split to keep every WOFF2 under 4 MiB.
+const lxgwWenKaiChunks = [
+	["base", "U+0-33FF"],
+	["cjk-ext-a", "U+3400-4DFF"],
+	["cjk-1", "U+4E00-65FF"],
+	["cjk-2", "U+6600-7DFF"],
+	["cjk-3", "U+7E00-9FFF"],
+	["high", "U+A000-10FFFF"],
+];
 
 // https://astro.build/config
 export default defineConfig({
@@ -62,18 +71,12 @@ export default defineConfig({
 					styles: ["normal", "italic"],
 				},
 				{
-					name: "ZenMaruGothic-Medium",
+					name: "Nunito",
 					cssVariable: "--font-body",
-					provider: fontProviders.local(),
-					options: {
-						variants: [
-							{
-								src: ["./src/assets/fonts/ZenMaruGothic-Medium.woff2"],
-								weight: "500",
-								style: "normal",
-							},
-						],
-					},
+					provider: fontProviders.fontsource(),
+					weights: ["400 700"],
+					styles: ["normal"],
+					subsets: ["latin", "latin-ext"],
 					// These variables are composed into --font-sans below. Keep their
 					// fallback lists empty; otherwise a system fallback after this Latin
 					// font prevents the following CJK font from ever being considered.
@@ -81,17 +84,16 @@ export default defineConfig({
 					optimizedFallbacks: false,
 				},
 				{
-					name: "Loli",
+					name: "LXGW WenKai",
 					cssVariable: "--font-cjk",
 					provider: fontProviders.local(),
 					options: {
-						variants: [
-							{
-								src: ["./src/assets/fonts/loli.woff2"],
-								weight: "400",
-								style: "normal",
-							},
-						],
+						variants: lxgwWenKaiChunks.map(([name, unicodeRange]) => ({
+							src: [`./src/assets/fonts/lxgw-wenkai-500-${name}.woff2`],
+							weight: "500",
+							style: "normal",
+							unicodeRange: [unicodeRange],
+						})),
 					},
 					// The final system fallback belongs to --font-sans, not this partial
 					// CJK font stack.

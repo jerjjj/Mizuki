@@ -76,7 +76,7 @@ export interface SiteConfig {
 	};
 
 	font?: {
-		mode?: "custom" | "system"; // custom=加载 ZenMaruGothic、Loli 和 JetBrains Mono；system=不请求自定义字体
+		mode?: "custom" | "system"; // custom=加载 Nunito、霞鹜文楷和 JetBrains Mono；system=不请求自定义字体
 	};
 
 	// 添加bangumi配置

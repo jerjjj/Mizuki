@@ -260,6 +260,16 @@
   }
 
   /* --- 数学公式样式 --- */
+  .katex .cjk_fallback {
+    font-family: var(
+      --font-cjk,
+      "LXGW WenKai",
+      "Microsoft YaHei",
+      "PingFang SC",
+      sans-serif
+    );
+  }
+
   .katex-display {
     @apply w-full overflow-x-auto overflow-y-hidden box-border my-4;
     padding-bottom: 6px;

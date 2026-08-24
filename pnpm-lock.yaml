@@ -204,9 +204,6 @@ importers:
       fast-xml-parser:
         specifier: 5.10.1
         version: 5.10.1
-      fonteditor-core:
-        specifier: ^2.6.3
-        version: 2.6.3
       glob:
         specifier: ^13.0.6
         version: 13.0.6
@@ -3007,9 +3004,6 @@ packages:
 
   fontace@0.4.1:
     resolution: {integrity: sha512-lDMvbAzSnHmbYMTEld5qdtvNH2/pWpICOqpean9IgC7vUbUJc3k+k5Dokp85CegamqQpFbXf0rAVkbzpyTA8aw==}
-
-  fonteditor-core@2.6.3:
-    resolution: {integrity: sha512-YUryIKjkenjZ41E7JvM3V+02Ak4mTHDDTwBWgs9KBzypzHqLZHuua1UDRevZNTKawmnq1dbBAa70Jddl2+F4FQ==}
 
   fontkitten@1.0.3:
     resolution: {integrity: sha512-Wp1zXWPVUPBmfoa3Cqc9ctaKuzKAV6uLstRqlR56kSjplf5uAce+qeyYym7F+PHbGTk+tCEdkCW6RD7DX/gBZw==}
@@ -8728,10 +8722,6 @@ snapshots:
   fontace@0.4.1:
     dependencies:
       fontkitten: 1.0.3
-
-  fonteditor-core@2.6.3:
-    dependencies:
-      '@xmldom/xmldom': 0.8.13
 
   fontkitten@1.0.3:
     dependencies:

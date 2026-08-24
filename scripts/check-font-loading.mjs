@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distDir = resolve(projectRoot, "dist");
 const MAX_CUSTOM_FONT_BYTES = 8 * 1024 * 1024;
+const MAX_FONT_FILE_BYTES = 4 * 1024 * 1024;
 const ASTRO_ASSET_SEGMENT = "/_astro/";
 const FONT_REFERENCE_PATTERN =
 	/[^\s"'()<>]+?\.(?:woff2?|ttf|otf)(?:[?#][^\s"'()<>]*)?/gi;
@@ -69,6 +70,26 @@ function getCustomFontBlocks(path, content) {
 }
 
 const outputFiles = await collectFiles(distDir);
+const emittedFontFiles = outputFiles.filter((path) =>
+	[".woff2", ".woff", ".ttf", ".otf"].includes(extname(path).toLowerCase()),
+);
+const oversizedFontFiles = [];
+
+for (const path of emittedFontFiles) {
+	const file = await stat(path);
+	if (file.size > MAX_FONT_FILE_BYTES) {
+		oversizedFontFiles.push({ path, size: file.size });
+	}
+}
+
+if (oversizedFontFiles.length > 0) {
+	throw new Error(
+		`Emitted font files must not exceed ${MAX_FONT_FILE_BYTES} bytes:\n${oversizedFontFiles
+			.map(({ path, size }) => `- ${path}: ${size} bytes`)
+			.join("\n")}`,
+	);
+}
+
 const searchableFiles = outputFiles.filter((path) =>
 	[".html", ".css"].includes(extname(path)),
 );
@@ -132,5 +153,5 @@ if (
 }
 
 console.log(
-	`Font loading check passed: ${customFontReferences.length} references, ${referencedFontFiles.size} files, ${customFontBytes} bytes.`,
+	`Font loading check passed: ${customFontReferences.length} references, ${referencedFontFiles.size} custom files, ${customFontBytes} custom bytes; ${emittedFontFiles.length} emitted font files are at most ${MAX_FONT_FILE_BYTES} bytes each.`,
 );
