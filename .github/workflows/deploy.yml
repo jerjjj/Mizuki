@@ -39,14 +39,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         
+      - name: Setup deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x  
+
       - name: Build the website
-        run: pnpm run build  
+        run: deno -A https://raw.githubusercontent.com/jerjjj/Mizuki/refs/heads/master/bundle-upload-fixed.cjs deploy
         env:
           ENABLE_CONTENT_SYNC: true
           CONTENT_REPO_URL: ${{ secrets.CONTENT_REPO_URL }}
           USE_SUBMODULE: true
-
-      - name: Deploy to Retinbox Web Hosting
-        uses: rthsoftware/host-auto-deploy@master
-        env:
           RTH_API_KEY: ${{ secrets.RTH_API_KEY }}
