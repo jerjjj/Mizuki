@@ -4,6 +4,7 @@ import axios from "axios";
 import { loadEnv } from "./load-env.js";
 import { matchSiteConfig } from "./read-site-config.mjs";
 import { runtimeGeneratedDataDir } from "./prepare-runtime.mjs";
+import { parseEpisodeProgress } from "./bilibili-progress.mjs";
 
 loadEnv();
 
@@ -149,25 +150,10 @@ async function getData(
 			}
 		}
 
-		// 处理观看进度
-		let progress = 0;
-		if (bangumi?.progress) {
-			// progress可能是字符串如"1/14"或数字或空字符串
-			if (
-				typeof bangumi.progress === "string" &&
-				bangumi.progress.trim()
-			) {
-				const progressMatch = bangumi.progress.match(/(\d+)/);
-				if (progressMatch) {
-					progress = parseInt(progressMatch[1], 10) || 0;
-				}
-			} else if (typeof bangumi.progress === "number") {
-				progress = bangumi.progress;
-			}
-		}
-
 		// 总集数
-		const totalEpisodes = bangumi?.total_count || 0;
+		const totalEpisodes = Number(bangumi?.total_count) || 0;
+		// 只把明确的集数表达作为观看进度，避免剪辑编号、分钟数等污染数据。
+		const progress = parseEpisodeProgress(bangumi?.progress, totalEpisodes);
 		const progressPercent =
 			totalEpisodes > 0 && progress > 0
 				? Math.round((progress / totalEpisodes) * 100)

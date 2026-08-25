@@ -26,8 +26,20 @@ interface Props {
 
 const { anime, statusInfo, yearLabel, studioLabel } = Astro.props;
 
-const progressPercent =
-	anime.totalEpisodes > 0 ? (anime.progress / anime.totalEpisodes) * 100 : 0;
+const safeTotalEpisodes =
+	Number.isInteger(anime.totalEpisodes) && anime.totalEpisodes > 0
+		? anime.totalEpisodes
+		: 0;
+const safeProgress =
+	Number.isInteger(anime.progress) && anime.progress >= 0
+		? Math.min(anime.progress, safeTotalEpisodes)
+		: 0;
+const rawProgressPercent =
+	safeTotalEpisodes > 0 ? (safeProgress / safeTotalEpisodes) * 100 : 0;
+const progressPercent = Math.min(
+	100,
+	Math.max(0, Number.isFinite(rawProgressPercent) ? rawProgressPercent : 0),
+);
 ---
 
 <div
@@ -99,7 +111,7 @@ const progressPercent =
 						/>
 					</div>
 					<div class="text-white text-xs font-medium">
-						{anime.progress}/{anime.totalEpisodes} (
+						{safeProgress}/{safeTotalEpisodes} (
 						{Math.round(progressPercent)}%)
 					</div>
 				</div>

@@ -56,19 +56,34 @@ export function loadAnimeData(filename: string): AnimeItem[] {
 		const fileContent = fs.readFileSync(dataPath, "utf-8");
 		const rawData = JSON.parse(fileContent) as RawAnimeItem[];
 
-		return rawData.map((item) => ({
-			title: item.title || "Unknown",
-			cover: item.cover || "",
-			link: item.link || "",
-			status: item.status || "planned",
-			rating: Number(item.rating) || 0,
-			progress: Number(item.progress) || 0,
-			totalEpisodes: Number(item.totalEpisodes) || 12,
-			description: item.description || "",
-			year: item.year || "",
-			studio: item.studio || "",
-			genre: Array.isArray(item.genre) ? item.genre : [],
-		}));
+		return rawData.map((item) => {
+			const parsedTotalEpisodes = Number(item.totalEpisodes);
+			const totalEpisodes =
+				Number.isInteger(parsedTotalEpisodes) && parsedTotalEpisodes > 0
+					? parsedTotalEpisodes
+					: 12;
+			const parsedProgress = Number(item.progress);
+			const progress =
+				Number.isInteger(parsedProgress) &&
+				parsedProgress >= 0 &&
+				parsedProgress <= totalEpisodes
+					? parsedProgress
+					: 0;
+
+			return {
+				title: item.title || "Unknown",
+				cover: item.cover || "",
+				link: item.link || "",
+				status: item.status || "planned",
+				rating: Number(item.rating) || 0,
+				progress,
+				totalEpisodes,
+				description: item.description || "",
+				year: item.year || "",
+				studio: item.studio || "",
+				genre: Array.isArray(item.genre) ? item.genre : [],
+			};
+		});
 	} catch (error) {
 		console.error(`[Anime] Failed to parse ${filename}:`, error);
 		return [];
