@@ -15,6 +15,7 @@ console.log("已加载 .env 配置文件\n");
 const ENABLE_CONTENT_SYNC = process.env.ENABLE_CONTENT_SYNC !== "false"; // 默认启用
 const CONTENT_REPO_URL = process.env.CONTENT_REPO_URL || "";
 const CONTENT_DIR = process.env.CONTENT_DIR || path.join(rootDir, "content");
+const NO_AUTO_COMMIT = process.argv.includes("--no-commit");
 
 console.log("开始同步内容...\n");
 
@@ -168,6 +169,11 @@ for (const mapping of contentMappings) {
 }
 
 console.log("\n内容同步完成\n");
+if (NO_AUTO_COMMIT) {
+	console.log("已跳过主仓库自动提交");
+	process.exit(0);
+}
+
 try {
 	// 1. 获取 content 分支名
 	const branch = execSync("git rev-parse --abbrev-ref HEAD", {
