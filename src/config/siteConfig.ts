@@ -35,7 +35,7 @@ export const siteConfig: SiteConfig = {
     // 显示模式："text-icon" 显示图标+文本，"logo" 仅显示Logo
     mode: "text-icon",
     // 顶栏标题文本
-    text: "MizukiUI",
+    text: "JERのblog",
     // 顶栏标题图标路径，默认使用 public/assets/home/home.webp
     icon: "assets/home/home.webp",
     // 网站Logo图片路径
@@ -104,7 +104,7 @@ export const siteConfig: SiteConfig = {
   // 标签样式配置
   tagStyle: {
     // 是否使用新样式（悬停高亮样式）还是旧样式（外框常亮样式）
-    useNewStyle: false,
+    useNewStyle: true,
   },
 
   // 壁纸模式配置
@@ -225,7 +225,7 @@ export const siteConfig: SiteConfig = {
   // 卡片样式配置
   card: {
     border: true, // 开启卡片边框和微阴影，让卡片更有立体感
-    followTheme: false, // 卡片背景跟随主题色相
+    followTheme: true, // 卡片背景跟随主题色相
   },
   // 图片优化配置
   imageOptimization: {
