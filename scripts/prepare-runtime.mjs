@@ -163,11 +163,17 @@ export function ensureContentDirectory(settings, allowClone) {
 	}
 
 	fs.mkdirSync(path.dirname(settings.contentDir), { recursive: true });
-	execFileSync(
-		"git",
-		["clone", "--depth", "1", settings.repositoryUrl, settings.contentDir],
-		{ cwd: projectRoot, stdio: "inherit" },
-	);
+	try {
+		execFileSync(
+			"git",
+			["clone", "--depth", "1", settings.repositoryUrl, settings.contentDir],
+			{ cwd: projectRoot, stdio: "inherit" },
+		);
+	} catch {
+		throw new Error(
+			`Failed to clone CONTENT_REPO_URL into CONTENT_DIR: ${settings.contentDir}`,
+		);
+	}
 }
 
 function cleanRuntimeOutputs() {

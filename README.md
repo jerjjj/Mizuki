@@ -279,7 +279,7 @@ Mizuki-Content/
 
 Before development or builds, Mizuki materializes external content into ignored runtime directories. Theme assets from `public/` and content assets from `images/` are merged into `.runtime/public/`; articles and structured data are staged under `src/runtime-content/` and `src/runtime-data/`. External content wins when both sources provide the same runtime path.
 
-> If `CONTENT_DIR` is missing, `pnpm dev` clones `CONTENT_REPO_URL` into it once. If it already exists, development only reads and watches the local checkout: it never fetches, resets, stages, or commits either repository. Run `pnpm sync-content` explicitly when you want a clean content repository to fast-forward from its remote. Runtime directories are generated output and must not be edited or committed.
+> If `CONTENT_DIR` is missing, `pnpm dev` clones `CONTENT_REPO_URL` into it once. If it already exists, startup fetches once and fast-forwards only when the remote has new commits and the local checkout is clean. Local changes are never stashed or reset; when present, the merge is skipped and development continues with local content. Network and non-fast-forward failures also fall back to local content. Runtime directories are generated output and must not be edited or committed.
 
 For private repositories, use an SSH URL or configure credentials through the deployment platform. Never commit tokens in `.env` or put them in a public repository URL.
 

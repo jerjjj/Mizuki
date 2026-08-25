@@ -10,6 +10,7 @@ import {
 	mirrorLayers,
 	projectRoot,
 } from "../scripts/prepare-runtime.mjs";
+import { syncContentRepository } from "../scripts/sync-content.js";
 
 const testId = randomUUID();
 const testRoot = path.join(projectRoot, ".runtime", "tests", testId);
@@ -87,6 +88,80 @@ describe("runtime content materialization", () => {
 		);
 
 		ensureContentDirectory(settings, true);
+		assert.equal(
+			fs.readFileSync(path.join(checkoutDir, "posts", "example.md"), "utf8"),
+			"local-draft",
+		);
+	});
+
+	it("fast-forwards clean content and preserves dirty content during development", () => {
+		const repositoryDir = path.join(testRoot, "sync-repository");
+		const checkoutDir = path.join(testRoot, "sync-checkout");
+		fs.mkdirSync(repositoryDir, { recursive: true });
+		git(["init"], repositoryDir);
+		write("posts/example.md", "remote-v1", repositoryDir);
+		git(["add", "."], repositoryDir);
+		git(
+			[
+				"-c",
+				"user.name=Runtime Test",
+				"-c",
+				"user.email=runtime-test@example.invalid",
+				"commit",
+				"-m",
+				"initial content",
+			],
+			repositoryDir,
+		);
+
+		const settings = {
+			enabled: true,
+			contentDir: checkoutDir,
+			repositoryUrl: repositoryDir,
+		};
+		assert.equal(syncContentRepository(settings).status, "cloned");
+
+		write("posts/example.md", "remote-v2", repositoryDir);
+		git(["add", "."], repositoryDir);
+		git(
+			[
+				"-c",
+				"user.name=Runtime Test",
+				"-c",
+				"user.email=runtime-test@example.invalid",
+				"commit",
+				"-m",
+				"remote update",
+			],
+			repositoryDir,
+		);
+		assert.equal(
+			syncContentRepository(settings, { development: true }).status,
+			"updated",
+		);
+		assert.equal(
+			fs.readFileSync(path.join(checkoutDir, "posts", "example.md"), "utf8"),
+			"remote-v2",
+		);
+
+		write("posts/example.md", "local-draft", checkoutDir);
+		write("posts/example.md", "remote-v3", repositoryDir);
+		git(["add", "."], repositoryDir);
+		git(
+			[
+				"-c",
+				"user.name=Runtime Test",
+				"-c",
+				"user.email=runtime-test@example.invalid",
+				"commit",
+				"-m",
+				"second remote update",
+			],
+			repositoryDir,
+		);
+		const dirtyResult = syncContentRepository(settings, { development: true });
+		assert.equal(dirtyResult.status, "skipped-dirty");
+		assert.equal(dirtyResult.behind, 1);
 		assert.equal(
 			fs.readFileSync(path.join(checkoutDir, "posts", "example.md"), "utf8"),
 			"local-draft",

@@ -136,7 +136,7 @@ git commit -m "Update article"
 git push
 ```
 
-> **只读开发流程**：`CONTENT_DIR` 不存在时，`pnpm dev` 会先从 `CONTENT_REPO_URL` 克隆一次；目录已存在时只读取本地内容，不会 fetch 或 reset。文章、数据和图片会合并到已忽略的 `.runtime/`、`src/runtime-content/` 与 `src/runtime-data/`，不会替换主仓库受跟踪目录或创建 Git 提交。开发期间修改内容仓库会触发增量重新准备。需要拉取远程内容时显式运行 `pnpm sync-content`；仓库有本地修改时该命令会拒绝更新，不会自动 stash 或 reset。
+> **安全的开发同步流程**：`CONTENT_DIR` 不存在时，`pnpm dev` 会先从 `CONTENT_REPO_URL` 克隆一次；目录已存在时，启动阶段只检查一次远程更新。仅当远程领先且本地工作区干净时才执行 fast-forward；本地有修改时不会 stash 或 reset，而是跳过合并并继续使用本地内容。离线、远程检查失败或无法 fast-forward 时也会回退到本地内容继续启动。之后文章、数据和图片会合并到已忽略的 `.runtime/`、`src/runtime-content/` 与 `src/runtime-data/`，不会替换主仓库受跟踪目录或创建 Git 提交。
 
 ### 模式切换
 
@@ -525,18 +525,18 @@ CONTENT_REPO_URL=https://YOUR_TOKEN@github.com/your-username/Mizuki-Content-Priv
 | `pnpm run check` | 运行 Astro 诊断 |
 | `pnpm run type-check` | 运行 TypeScript 类型检查 |
 | `pnpm run prepare-runtime` | 只读合并本地内容源到忽略的运行时目录 |
-| `pnpm dev` | `CONTENT_DIR` 缺失时克隆一次，随后准备本地运行时内容并启动监听 |
+| `pnpm dev` | 克隆缺失的内容目录，或检查一次远程更新，然后准备运行时内容并启动监听 |
 | `pnpm build` | 从本地内容源生成干净运行时目录后构建 |
 
 ### 运行时准备时机
 
 以下命令会从本地源目录准备忽略的运行时内容:
 
-- `pnpm dev` - 内容目录缺失时先克隆，随后增量准备并监听后续修改
+- `pnpm dev` - 内容目录缺失时克隆；否则检查一次远程更新，再增量准备并监听后续修改
 - `pnpm build` - 构建前执行一次干净准备
 - `pnpm check` / `pnpm type-check` - 检查前增量准备
 
-准备失败会直接中断命令。只有显式运行 `pnpm sync-content` 才会访问内容仓库的远程 Git。
+内容目录首次克隆或运行时准备失败会中断命令。已有内容目录的远程检查失败时会继续使用本地内容；`pnpm sync-content` 仍提供严格的显式同步，失败时返回非零状态。
 
 ---
 
