@@ -16,6 +16,7 @@ const ENABLE_CONTENT_SYNC = process.env.ENABLE_CONTENT_SYNC !== "false"; // 默�
 const CONTENT_REPO_URL = process.env.CONTENT_REPO_URL || "";
 const CONTENT_DIR = process.env.CONTENT_DIR || path.join(rootDir, "content");
 const NO_AUTO_COMMIT = process.argv.includes("--no-commit");
+const NO_REMOTE_UPDATE = process.argv.includes("--no-remote-update");
 
 console.log("开始同步内容...\n");
 
@@ -56,7 +57,9 @@ if (!fs.existsSync(CONTENT_DIR)) {
 } else {
 	console.log(`内容目录已存在：${CONTENT_DIR}`);
 
-	if (fs.existsSync(path.join(CONTENT_DIR, ".git"))) {
+	if (fs.existsSync(path.join(CONTENT_DIR, ".git")) && NO_REMOTE_UPDATE) {
+		console.log("开发模式：使用现有本地内容，跳过远程更新");
+	} else if (fs.existsSync(path.join(CONTENT_DIR, ".git"))) {
 		try {
 			console.log("正在同步远程内容（强制模式）...");
 

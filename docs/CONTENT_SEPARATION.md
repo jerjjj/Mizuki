@@ -136,7 +136,7 @@ git commit -m "Update article"
 git push
 ```
 
-> **同步副作用**：当 `CONTENT_DIR` 已经是 Git 仓库时，同步脚本会 fetch 并将其重置到远程 `main` 或 `master` 分支。建立运行时映射时，它还可能将已有目录备份为 `.backup`、创建 junction 或复制文件。`pnpm dev` 会跳过代码仓库自动提交，但 `pnpm build` 和 `pnpm run sync-content` 仍可能提交同步结果。运行前请提交或备份本地修改，不要直接编辑同步目标。
+> **同步副作用**：首次运行 `pnpm dev` 时，如果 `CONTENT_DIR` 不存在，同步脚本会克隆内容仓库；后续开发启动会使用现有本地内容，跳过远程 fetch/reset 和代码仓库自动提交。`pnpm build` 和 `pnpm run sync-content` 仍会 fetch、重置到远程 `main` 或 `master` 分支，并可能提交同步结果。建立运行时映射时，同步脚本还可能将已有目录备份为 `.backup`、创建 junction 或复制文件。运行前请提交或备份本地修改，不要直接编辑同步目标。
 
 ### 模式切换
 
