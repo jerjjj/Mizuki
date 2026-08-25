@@ -51,3 +51,4 @@ jobs:
           CONTENT_REPO_URL: ${{ secrets.CONTENT_REPO_URL }}
           USE_SUBMODULE: true
           RTH_API_KEY: ${{ secrets.RTH_API_KEY }}
+          BILI_SESSDATA: ${{ secrets.BILI_SESSDATA }}

@@ -10,6 +10,7 @@ export const projectRoot = path.resolve(scriptDir, "..");
 
 const runtimeRoot = path.join(projectRoot, ".runtime");
 export const runtimePublicDir = path.join(runtimeRoot, "public");
+export const runtimeGeneratedDataDir = path.join(runtimeRoot, "generated-data");
 const runtimeContentDir = path.join(projectRoot, "src", "runtime-content");
 const runtimeDataDir = path.join(projectRoot, "src", "runtime-data");
 const runtimeOverrideDir = path.join(projectRoot, "src", "config", "overrides");
@@ -179,6 +180,7 @@ export function ensureContentDirectory(settings, allowClone) {
 function cleanRuntimeOutputs() {
 	for (const target of [
 		runtimePublicDir,
+		runtimeGeneratedDataDir,
 		runtimeContentDir,
 		runtimeDataDir,
 		runtimeOverrideDir,

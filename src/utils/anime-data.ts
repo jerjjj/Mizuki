@@ -1,9 +1,9 @@
 import fs from "node:fs";
-import path from "node:path";
 
 import localAnimeList from "@data/anime";
 import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
+import { getAnimeDataPaths, resolveAnimeDataPath } from "./anime-data-paths";
 
 export interface RawAnimeItem {
 	title?: string;
@@ -38,15 +38,17 @@ export type AnimeSourceConfig =
 	| {
 			type: "json";
 			filename: string;
-			fetchOnDev?: boolean;
 			emptyDescription?: string;
 	  };
 
 export function loadAnimeData(filename: string): AnimeItem[] {
-	const dataPath = path.join(process.cwd(), `src/data/${filename}`);
+	const dataPaths = getAnimeDataPaths(filename);
+	const dataPath = resolveAnimeDataPath(filename);
 
-	if (!fs.existsSync(dataPath)) {
-		console.warn(`[Anime] Data file not found: ${dataPath}`);
+	if (!dataPath) {
+		console.warn(
+			`[Anime] Data file not found. Checked: ${dataPaths.join(", ")}`,
+		);
 		return [];
 	}
 
@@ -82,13 +84,11 @@ export function getAnimeSourceConfigs(): Record<string, AnimeSourceConfig> {
 		bilibili: {
 			type: "json",
 			filename: "bilibili-data.json",
-			fetchOnDev: undefined,
 			emptyDescription: i18n(I18nKey.animeEmptyBilibili),
 		},
 		bangumi: {
 			type: "json",
 			filename: "bangumi-data.json",
-			fetchOnDev: undefined,
 			emptyDescription: i18n(I18nKey.animeEmptyBangumi),
 		},
 	};
@@ -105,16 +105,7 @@ export function getAnimeList(
 		if (currentConfig.type === "local") {
 			animeList = currentConfig.data;
 		} else if (currentConfig.type === "json") {
-			const isDev = import.meta.env.DEV;
-			const shouldFetchOnDev = currentConfig.fetchOnDev ?? false;
-			const skipLoad = isDev && !shouldFetchOnDev;
-
-			if (skipLoad) {
-				console.log(`[Dev] Skipping ${mode} data load (fetchOnDev is off).`);
-				animeList = [];
-			} else {
-				animeList = loadAnimeData(currentConfig.filename);
-			}
+			animeList = loadAnimeData(currentConfig.filename);
 		}
 	} else {
 		console.warn(`[Anime] Unknown or unconfigured mode: ${mode}`);

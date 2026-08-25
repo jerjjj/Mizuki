@@ -1,13 +1,10 @@
 import fs from "fs/promises";
 import path from "path";
-import { fileURLToPath } from "url";
 import { matchSiteConfig } from "./read-site-config.mjs";
+import { runtimeGeneratedDataDir } from "./prepare-runtime.mjs";
 
 const API_BASE = "https://api.bgm.tv";
-const OUTPUT_FILE = path.join(
-	path.dirname(fileURLToPath(import.meta.url)),
-	"../src/data/bangumi-data.json",
-);
+const OUTPUT_FILE = path.join(runtimeGeneratedDataDir, "bangumi-data.json");
 
 function getUserIdFromConfig() {
 	const userId = matchSiteConfig("bangumi", /userId:\s*["']([^"']+)["']/);
@@ -213,13 +210,15 @@ async function main() {
 		await fs.mkdir(dir, { recursive: true });
 	}
 
-	await fs.writeFile(OUTPUT_FILE, JSON.stringify(finalAnimeList, null, 2));
+	const temporaryFile = `${OUTPUT_FILE}.${process.pid}.tmp`;
+	await fs.writeFile(temporaryFile, JSON.stringify(finalAnimeList, null, 2));
+	await fs.rename(temporaryFile, OUTPUT_FILE);
 	console.log(`\nUpdate complete! Data saved to: ${OUTPUT_FILE}`);
 	console.log(`Total collected: ${finalAnimeList.length} anime series`);
 }
 
 main().catch((err) => {
 	console.error("\n✘ Script execution error:");
-	console.error(err);
+	console.error(err instanceof Error ? err.message : String(err));
 	process.exit(1);
 });

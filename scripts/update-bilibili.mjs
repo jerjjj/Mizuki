@@ -1,18 +1,15 @@
 import fs from "fs/promises";
 import path from "path";
-import { fileURLToPath } from "url";
 import axios from "axios";
 import { loadEnv } from "./load-env.js";
 import { matchSiteConfig } from "./read-site-config.mjs";
+import { runtimeGeneratedDataDir } from "./prepare-runtime.mjs";
 
 loadEnv();
 
 const API_BASE = "https://api.bilibili.com/x/space/bangumi/follow/list";
 const PAGE_SIZE = 30;
-const OUTPUT_FILE = path.join(
-	path.dirname(fileURLToPath(import.meta.url)),
-	"../src/data/bilibili-data.json",
-);
+const OUTPUT_FILE = path.join(runtimeGeneratedDataDir, "bilibili-data.json");
 
 // 状态映射: 1=想看, 2=在看, 3=已看
 const STATUS_MAP = {
@@ -69,10 +66,18 @@ function getAnimeModeFromConfig() {
 	return matchSiteConfig("anime", /mode:\s*["']([^"']+)["']/) || "bangumi";
 }
 
-async function getDataPage(vmid, status, typeNum = 1) {
+function getRequestHeaders(SESSDATA) {
+	return {
+		referer: "https://space.bilibili.com/",
+		...(SESSDATA ? { cookie: `SESSDATA=${SESSDATA};` } : {}),
+	};
+}
+
+async function getDataPage(vmid, status, typeNum = 1, SESSDATA = "") {
 	const response = await withRetry(() =>
 		axios.get(
 			`${API_BASE}?type=${typeNum}&follow_status=${status}&vmid=${vmid}&ps=1&pn=1`,
+			{ headers: getRequestHeaders(SESSDATA), timeout: 10000 },
 		),
 	);
 
@@ -100,12 +105,10 @@ async function getData(
 	coverMirror,
 	SESSDATA,
 ) {
-	const headers = SESSDATA ? { cookie: `SESSDATA=${SESSDATA};` } : {};
-
 	const response = await withRetry(() =>
 		axios.get(
 			`${API_BASE}?type=${typeNum}&follow_status=${status}&vmid=${vmid}&ps=${PAGE_SIZE}&pn=${pn}`,
-			{ headers },
+			{ headers: getRequestHeaders(SESSDATA), timeout: 10000 },
 		),
 	);
 
@@ -255,10 +258,9 @@ async function processData(
 	coverMirror,
 	SESSDATA,
 ) {
-	const page = await getDataPage(vmid, status, typeNum);
+	const page = await getDataPage(vmid, status, typeNum, SESSDATA);
 	if (!page?.success) {
-		console.error(`Get bangumi data error:`, page?.data);
-		return [];
+		throw new Error(`Failed to fetch Bilibili page count: ${page?.data}`);
 	}
 
 	const list = [];
@@ -342,7 +344,9 @@ async function main() {
 		await fs.mkdir(dir, { recursive: true });
 	}
 
-	await fs.writeFile(OUTPUT_FILE, JSON.stringify(finalAnimeList, null, 2));
+	const temporaryFile = `${OUTPUT_FILE}.${process.pid}.tmp`;
+	await fs.writeFile(temporaryFile, JSON.stringify(finalAnimeList, null, 2));
+	await fs.rename(temporaryFile, OUTPUT_FILE);
 	console.log(`\nUpdate complete! Data saved to: ${OUTPUT_FILE}`);
 	console.log(`Total collected: ${finalAnimeList.length} anime series`);
 	console.log(`  - Planned: ${planned.length}`);
@@ -352,6 +356,6 @@ async function main() {
 
 main().catch((err) => {
 	console.error("\n✘ Script execution error:");
-	console.error(err);
+	console.error(err instanceof Error ? err.message : String(err));
 	process.exit(1);
 });

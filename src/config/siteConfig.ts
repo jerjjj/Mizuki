@@ -19,7 +19,7 @@ export const siteConfig: SiteConfig = {
 
   // 特色页面开关配置（关闭未使用的页面有助于提升 SEO，关闭后请记得在 navbarConfig 中移除对应链接）
   featurePages: {
-    anime: false, // 番剧页面开关
+    anime: true, // 番剧页面开关
     diary: false, // 日记页面开关
     friends: false, // 友链页面开关
     projects: false, // 项目页面开关
@@ -37,9 +37,9 @@ export const siteConfig: SiteConfig = {
     // 顶栏标题文本
     text: "JERのblog",
     // 顶栏标题图标路径，默认使用 public/assets/home/home.webp
-    icon: "assets/home/home.webp",
+    icon: "assets/home/website-icon.webp",
     // 网站Logo图片路径
-    logo: "assets/home/default-logo.webp",
+    logo: "assets/home/website-logo.webp",
   },
 
   // 旧版页面自动缩放配置。默认关闭，页面尺寸优先交由响应式布局处理。
@@ -59,9 +59,9 @@ export const siteConfig: SiteConfig = {
   },
 
   bilibili: {
-    vmid: "your-bilibili-vmid", // 在此处设置你的Bilibili用户ID (uid)，例如 "1129280784"
-    fetchOnDev: false, // 是否在开发环境下获取 Bilibili 数据（默认 false）
-    coverMirror: "", // 封面图片镜像源（可选，如果需要使用镜像源，例如 "https://images.weserv.nl/?url="）
+    vmid: "500251435", // 在此处设置你的Bilibili用户ID (uid)，例如 "1129280784"
+    fetchOnDev: true, // 是否在开发环境下获取 Bilibili 数据（默认 false）
+    coverMirror: "https://images.weserv.nl/?url=", // 封面图片镜像源（可选，如果需要使用镜像源，例如 "https://images.weserv.nl/?url="）
     useWebp: true, // 是否使用WebP格式（默认 true）
 
     // bilibili 观看进度配置说明(可选，如需配置仔细阅读):
@@ -72,7 +72,7 @@ export const siteConfig: SiteConfig = {
   },
 
   anime: {
-    mode: "local", // 番剧页面模式："bangumi" 使用Bangumi API，"local" 使用本地配置，"bilibili" 使用Bilibili API
+    mode: "bilibili", // 番剧页面模式："bangumi" 使用Bangumi API，"local" 使用本地配置，"bilibili" 使用Bilibili API
   },
 
   // 日记页面 Memos API 地址，留空则使用静态数据

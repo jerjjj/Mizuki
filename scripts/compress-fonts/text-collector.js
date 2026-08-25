@@ -258,8 +258,15 @@ async function fetchBilibiliAnimeText() {
 			return new Set();
 		}
 
-		const dataFilePath = path.join(ROOT_DIR, "src/data/bilibili-data.json");
-		if (!fs.existsSync(dataFilePath)) {
+		const candidatePaths = [
+			path.join(ROOT_DIR, ".runtime/generated-data/bilibili-data.json"),
+			path.join(ROOT_DIR, "src/runtime-data/bilibili-data.json"),
+			path.join(ROOT_DIR, "src/data/bilibili-data.json"),
+		];
+		const dataFilePath = candidatePaths.find((candidate) =>
+			fs.existsSync(candidate),
+		);
+		if (!dataFilePath) {
 			console.log(
 				"ℹ Bilibili data file not found, skipping Bilibili text collection",
 			);
