@@ -15,6 +15,7 @@
 			}
 		],
 		"paths": {
+			"@data/*": ["./src/runtime-data/*", "./src/data/*"],
 			"@components/*": ["./src/components/*"],
 			"@assets/*": ["./src/assets/*"],
 			"@constants/*": ["./src/constants/*"],

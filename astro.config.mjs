@@ -11,6 +11,7 @@ import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
 import { pluginLanguageLogo } from "ec-lang-logo";
 import "katex/dist/contrib/mhchem.mjs";
+import path from "node:path";
 import { oddmisc } from "oddmisc";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeCodeGroup from "rehype-code-group";
@@ -20,7 +21,11 @@ import rehypeSlug from "rehype-slug";
 import remarkDirective from "remark-directive";
 import remarkMath from "remark-math";
 import remarkSectionize from "remark-sectionize";
-
+import {
+	getRuntimeWatchDirectories,
+	prepareRuntime,
+	runtimePublicDir,
+} from "./scripts/prepare-runtime.mjs";
 import {
 	expressiveCodeConfig,
 	markdownConfig,
@@ -48,6 +53,43 @@ import { remarkMermaid } from "./src/plugins/remark-mermaid.js";
 import { remarkPlantuml } from "./src/plugins/remark-plantuml.mjs";
 import { remarkWikiLink } from "./src/plugins/remark-wiki-link.mjs";
 import { resolveFontMode } from "./src/utils/fontMode.ts";
+
+function runtimeContentIntegration() {
+	return {
+		name: "mizuki-runtime-content",
+		hooks: {
+			"astro:server:setup": ({ server }) => {
+				const watchDirectories = getRuntimeWatchDirectories().map((directory) =>
+					path.resolve(directory),
+				);
+				let refreshTimer;
+
+				server.watcher.add(watchDirectories);
+				server.watcher.on("all", (_event, changedPath) => {
+					const absolutePath = path.resolve(changedPath);
+					const belongsToSource = watchDirectories.some(
+						(directory) =>
+							absolutePath === directory ||
+							absolutePath.startsWith(`${directory}${path.sep}`),
+					);
+					if (!belongsToSource) return;
+
+					clearTimeout(refreshTimer);
+					refreshTimer = setTimeout(() => {
+						try {
+							prepareRuntime();
+							server.ws.send({ type: "full-reload" });
+						} catch (error) {
+							server.config.logger.error(
+								`Runtime content refresh failed: ${error.message}`,
+							);
+						}
+					}, 100);
+				});
+			},
+		},
+	};
+}
 
 const customFontsEnabled = resolveFontMode(siteConfig) === "custom";
 // Fontsource lxgw-wenkai 5.3.0, weight 500; split to keep every WOFF2 under 4 MiB.
@@ -109,6 +151,7 @@ export default defineConfig({
 	compressHTML: true,
 
 	output: "static",
+	publicDir: runtimePublicDir,
 
 	image: {
 		layout: "constrained",
@@ -119,6 +162,7 @@ export default defineConfig({
 	},
 
 	integrations: [
+		runtimeContentIntegration(),
 		oddmisc({
 			umami: {
 				shareUrl: false,

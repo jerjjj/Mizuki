@@ -1,4 +1,4 @@
-import type { DiaryItem } from "../../../data/diary";
+import type { DiaryItem } from "@data/diary";
 
 export interface MomentCardProps {
 	moment: DiaryItem;

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import localAnimeList from "../data/anime";
+import localAnimeList from "@data/anime";
 import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
 

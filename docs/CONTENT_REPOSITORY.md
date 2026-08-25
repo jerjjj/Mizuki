@@ -30,15 +30,17 @@ Mizuki-Content/
 └── README.md
 ```
 
-各目录同步到代码仓库的位置：
+各目录在开发和构建时生成到以下忽略的运行时位置：
 
 | 内容仓库 | 代码仓库 |
 | --- | --- |
-| `posts/` | `src/content/posts/` |
-| `spec/` | `src/content/spec/` |
-| `data/` | `src/data/` |
-| `images/` | `public/images/` |
+| `posts/` | `src/runtime-content/posts/` |
+| `spec/` | `src/runtime-content/spec/` |
+| `data/` | `src/runtime-data/` |
+| `images/` | `.runtime/public/images/` |
 | `overrides/` | `src/config/overrides/` |
+
+这些位置都是生成物。请在内容仓库中编辑源文件，不要编辑运行时副本。
 
 ## 🚀 快速开始
 

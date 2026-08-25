@@ -5,7 +5,10 @@ import { z } from "astro/zod";
 import { postGlob } from "./loaders/post-loader";
 
 const postsCollection = defineCollection({
-	loader: postGlob({ pattern: "**/*.{md,mdx}", base: "./src/content/posts" }),
+	loader: postGlob({
+		pattern: "**/*.{md,mdx}",
+		base: "./src/runtime-content/posts",
+	}),
 	schema: z.object({
 		title: z.string(),
 		published: z.date(),
@@ -46,7 +49,10 @@ const postsCollection = defineCollection({
 	}),
 });
 const specCollection = defineCollection({
-	loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/spec" }),
+	loader: glob({
+		pattern: "**/*.{md,mdx}",
+		base: "./src/runtime-content/spec",
+	}),
 	schema: z.object({}),
 });
 export const collections = {

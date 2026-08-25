@@ -276,7 +276,7 @@ USE_SUBMODULE=false  # ⚠️ Cloudflare Pages 默认不支持 submodule
 // package.json
 {
   "scripts": {
-    "prebuild": "node scripts/sync-content.js || true"
+    "prebuild": "node scripts/prepare-runtime.mjs --allow-clone --clean"
   }
 }
 ```
@@ -284,14 +284,14 @@ USE_SUBMODULE=false  # ⚠️ Cloudflare Pages 默认不支持 submodule
 **工作原理**:
 1. `pnpm build` 执行前自动运行 `prebuild` 钩子
 2. 检查 `ENABLE_CONTENT_SYNC` 环境变量
-3. 如果为 `true`，从远程仓库同步内容到 `src/content/` 和 `public/images/`
-4. 如果为 `false` 或未设置，跳过同步，使用本地内容
-5. `|| true` 确保同步失败不会中断构建
+3. 如果为 `true`，读取已有 `CONTENT_DIR`；全新构建环境缺少目录时才克隆仓库
+4. 将内容生成到 `.runtime/`、`src/runtime-content/` 和 `src/runtime-data/`，不修改受 Git 跟踪的源目录
+5. 内容缺失或准备失败时立即中断构建，避免部署不完整站点
 
 **优势**:
 - ✅ 统一的构建命令，无需修改配置
 - ✅ 自动兼容所有部署模式
-- ✅ 同步失败不影响构建（回退到本地内容）
+- ✅ 构建输入缺失时快速失败，不会静默部署旧内容
 
 ---
 

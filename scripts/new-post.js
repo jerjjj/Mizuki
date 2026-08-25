@@ -2,6 +2,9 @@
 
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+import { loadEnv } from "./load-env.js";
 
 function getDate() {
 	const today = new Date();
@@ -28,8 +31,20 @@ if (!fileExtensionRegex.test(fileName)) {
 	fileName += ".md";
 }
 
-const targetDir = "./src/content/posts/";
-const fullPath = path.join(targetDir, fileName);
+loadEnv();
+const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const externalContentEnabled = process.env.ENABLE_CONTENT_SYNC === "true";
+const contentDir = externalContentEnabled
+	? path.resolve(rootDir, process.env.CONTENT_DIR || "./content")
+	: path.join(rootDir, "src", "content");
+const targetDir = path.join(contentDir, "posts");
+const fullPath = path.resolve(targetDir, fileName);
+const relativePath = path.relative(targetDir, fullPath);
+
+if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
+	console.error("Error: post path must stay inside the posts directory");
+	process.exit(1);
+}
 
 if (fs.existsSync(fullPath)) {
 	console.error(`Error: File ${fullPath} already exists `);
@@ -54,6 +69,6 @@ lang: ''
 ---
 `;
 
-fs.writeFileSync(path.join(targetDir, fileName), content);
+fs.writeFileSync(fullPath, content);
 
 console.log(`Post ${fullPath} created`);

@@ -114,11 +114,11 @@ Get started quickly with our comprehensive documentation. Whether you're customi
 ### 📝 Content Management
 
 - **Create a post:** `pnpm new-post -- <filename>`; both `.md` and `.mdx` are supported.
-- **Edit posts:** Modify files in `src/content/posts/`.
-- **Edit About or Friends page content:** Modify the corresponding files in `src/content/spec/`.
-- **Edit structured page data:** Modify the relevant files in `src/data/`.
+- **Edit posts:** Use `src/content/posts/` in local mode or `<CONTENT_DIR>/posts/` in external mode.
+- **Edit About or Friends page content:** Use the corresponding `spec/` directory for the selected content mode.
+- **Edit structured page data:** Use `src/data/` in local mode or `<CONTENT_DIR>/data/` in external mode.
 - **Add article-local images:** Keep them next to the post and reference them with a relative path such as `./cover.webp`.
-- **Add public images:** Place them under `public/` and reference them with a root-relative path such as `/images/example.webp`.
+- **Add public images:** Use `public/` for theme-owned assets and `<CONTENT_DIR>/images/` for external content assets. Both are available through root-relative URLs such as `/images/example.webp`.
 
 > **Before publishing:** This repository includes demo posts, page data, albums, and images. Remove or replace the sample content before deploying your own site.
 
@@ -243,7 +243,7 @@ Mizuki can separate theme code from blog content into two repositories. This is 
 | Use case | Configuration | Content location |
 | :--- | :--- | :--- |
 | **Local content** | `ENABLE_CONTENT_SYNC=false` | `src/content/`, `src/data/`, and `public/images/` |
-| **External content repository** | `ENABLE_CONTENT_SYNC=true` and `CONTENT_REPO_URL=...` | A separate repository synchronized into the paths above |
+| **External content repository** | `ENABLE_CONTENT_SYNC=true` and `CONTENT_DIR=...` | A separate repository read through ignored runtime directories |
 
 **One-Click Enable/Disable**:
 
@@ -277,9 +277,9 @@ Mizuki-Content/
 └── images/      # Public images, including albums and post assets
 ```
 
-The sync script maps these directories to `src/content/posts/`, `src/content/spec/`, `src/data/`, and `public/images/`. `src/data/ai-tools.ts` is owned by the code repository and is preserved during synchronization.
+Before development or builds, Mizuki materializes external content into ignored runtime directories. Theme assets from `public/` and content assets from `images/` are merged into `.runtime/public/`; articles and structured data are staged under `src/runtime-content/` and `src/runtime-data/`. External content wins when both sources provide the same runtime path.
 
-> **Sync warning:** When `ENABLE_CONTENT_SYNC` is enabled, `pnpm dev` and `pnpm build` run the sync hook automatically. If `CONTENT_DIR` already contains a Git repository, the script fetches and resets it to its `main` or `master` remote branch. It can also back up existing runtime directories as `.backup`, create junctions or copies, and commit synchronized changes in the code repository. Commit or back up local content changes before running it, and do not edit synchronized target files directly.
+> If `CONTENT_DIR` is missing, `pnpm dev` clones `CONTENT_REPO_URL` into it once. If it already exists, development only reads and watches the local checkout: it never fetches, resets, stages, or commits either repository. Run `pnpm sync-content` explicitly when you want a clean content repository to fast-forward from its remote. Runtime directories are generated output and must not be edited or committed.
 
 For private repositories, use an SSH URL or configure credentials through the deployment platform. Never commit tokens in `.env` or put them in a public repository URL.
 

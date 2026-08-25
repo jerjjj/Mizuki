@@ -125,7 +125,7 @@ CONTENT_REPO_URL=https://github.com/your-username/Mizuki-Content.git
 
 **工作流程**:
 ```bash
-# 自动同步内容后启动
+# 从本地内容仓库准备运行时目录后启动
 pnpm dev
 
 # 内容在独立仓库编辑
@@ -136,7 +136,7 @@ git commit -m "Update article"
 git push
 ```
 
-> **同步副作用**：首次运行 `pnpm dev` 时，如果 `CONTENT_DIR` 不存在，同步脚本会克隆内容仓库；后续开发启动会使用现有本地内容，跳过远程 fetch/reset 和代码仓库自动提交。`pnpm build` 和 `pnpm run sync-content` 仍会 fetch、重置到远程 `main` 或 `master` 分支，并可能提交同步结果。建立运行时映射时，同步脚本还可能将已有目录备份为 `.backup`、创建 junction 或复制文件。运行前请提交或备份本地修改，不要直接编辑同步目标。
+> **只读开发流程**：`CONTENT_DIR` 不存在时，`pnpm dev` 会先从 `CONTENT_REPO_URL` 克隆一次；目录已存在时只读取本地内容，不会 fetch 或 reset。文章、数据和图片会合并到已忽略的 `.runtime/`、`src/runtime-content/` 与 `src/runtime-data/`，不会替换主仓库受跟踪目录或创建 Git 提交。开发期间修改内容仓库会触发增量重新准备。需要拉取远程内容时显式运行 `pnpm sync-content`；仓库有本地修改时该命令会拒绝更新，不会自动 stash 或 reset。
 
 ### 模式切换
 
@@ -362,7 +362,7 @@ on:
 - **深合并表达不了「删除」。** 覆盖只能改值或加字段，没法把上游默认里的某个键去掉。`pnpm export-config` 遇到这种情况会明确报出来，需要手工处理。
 - **评论语言不会自动跟随 `siteConfig.lang`。** `src/config/commentConfig.ts` 在模块顶层引用 `siteConfig.ts` 里的语言常量填充 Twikoo / Giscus 的 `lang`，覆盖 `siteConfig.lang` 时需要同时提供 `overrides/commentConfig.ts` 覆盖对应字段。
 - **读取配置请统一走 `@/config` 入口。** 直接 `import { siteConfig } from "@/config/siteConfig"` 会绕过合并，拿到未覆盖的默认值。
-- **开发服务器不监听内容仓库。** `src/config/overrides/` 在每次 dev/build 前由 sync-content 从内容仓库复制而来；dev 运行中修改覆盖文件需要重启 `pnpm dev` 才会重新同步。
+- **影响 Astro 构建配置的覆盖仍需重启。** 开发服务器会监听内容仓库并刷新文章、数据、图片和运行时覆盖文件；但字体、Markdown 插件等在 `astro.config.mjs` 加载时确定的配置，修改后仍需重启 `pnpm dev`。
 - **`scripts/compress-fonts/` 暂不读取覆盖值**，该目录是独立的手动工具，不在 `pnpm build` 流程内。番剧数据脚本（`update-anime` / `update-bangumi` / `update-bilibili`）已经会优先读覆盖值。
 
 ---
@@ -477,10 +477,11 @@ CONTENT_REPO_URL=https://YOUR_TOKEN@github.com/your-username/Mizuki-Content-Priv
 
 ### 快速配置
 
-所有部署平台都使用相同的自动同步机制:
+所有部署平台都使用相同的运行时准备机制:
 - ✅ `pnpm build` 执行前自动运行 `prebuild` 钩子
-- ✅ 根据 `ENABLE_CONTENT_SYNC` 决定是否同步内容
-- ✅ 同步失败不会中断构建,回退到本地内容
+- ✅ 根据 `ENABLE_CONTENT_SYNC` 决定读取本地内容还是外部内容仓库
+- ✅ 全新构建环境缺少 `CONTENT_DIR` 时才克隆，已有目录不会被 reset
+- ✅ 内容准备失败会中断构建，避免部署旧内容或不完整站点
 
 **只需配置环境变量,无需修改构建命令!**
 
@@ -523,17 +524,19 @@ CONTENT_REPO_URL=https://YOUR_TOKEN@github.com/your-username/Mizuki-Content-Priv
 | `pnpm run export-config` | 导出个人配置为 `overrides/` 覆盖文件 |
 | `pnpm run check` | 运行 Astro 诊断 |
 | `pnpm run type-check` | 运行 TypeScript 类型检查 |
-| `pnpm dev` | 启动开发服务器 (自动同步) |
-| `pnpm build` | 构建项目 (自动同步) |
+| `pnpm run prepare-runtime` | 只读合并本地内容源到忽略的运行时目录 |
+| `pnpm dev` | `CONTENT_DIR` 缺失时克隆一次，随后准备本地运行时内容并启动监听 |
+| `pnpm build` | 从本地内容源生成干净运行时目录后构建 |
 
-### 自动同步时机
+### 运行时准备时机
 
-当 `ENABLE_CONTENT_SYNC=true` 时,以下命令会自动同步内容:
+以下命令会从本地源目录准备忽略的运行时内容:
 
-- `pnpm dev` - 开发前自动同步
-- `pnpm build` - 构建前自动同步
+- `pnpm dev` - 内容目录缺失时先克隆，随后增量准备并监听后续修改
+- `pnpm build` - 构建前执行一次干净准备
+- `pnpm check` / `pnpm type-check` - 检查前增量准备
 
-同步失败不会中断开发,会显示警告并继续。
+准备失败会直接中断命令。只有显式运行 `pnpm sync-content` 才会访问内容仓库的远程 Git。
 
 ---
 

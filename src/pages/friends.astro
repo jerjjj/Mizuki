@@ -4,10 +4,9 @@ import Comment from "@components/comment/index.astro";
 import FriendCard from "@components/features/friends/FriendCard.astro";
 import { PageHeader } from "@components/features/page-header";
 import Markdown from "@components/misc/Markdown.astro";
+import { getShuffledFriendsList } from "@data/friends";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
-
 import { siteConfig } from "../config";
-import { getShuffledFriendsList } from "../data/friends";
 import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
 

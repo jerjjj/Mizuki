@@ -1,7 +1,7 @@
 // Memos API 集成 — 类型定义、数据转换和卡片渲染
 // 参考: DIARY_MEMOS_SETUP.md
 
-import type { DiaryItem } from "../../../data/diary";
+import type { DiaryItem } from "@data/diary";
 
 // --- Memos API 响应类型 ---
 

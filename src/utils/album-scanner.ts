@@ -4,7 +4,7 @@ import * as path from "node:path";
 import type { AlbumGroup, Photo } from "../types/album";
 
 export async function scanAlbums(): Promise<AlbumGroup[]> {
-	const albumsDir = path.join(process.cwd(), "public/images/albums");
+	const albumsDir = path.join(process.cwd(), ".runtime/public/images/albums");
 	const albums: AlbumGroup[] = [];
 
 	// 检查目录是否存在

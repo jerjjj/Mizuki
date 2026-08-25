@@ -6,6 +6,11 @@ dist/
 demo
 plans
 
+# generated runtime content and merged public assets
+/.runtime/
+/src/runtime-content/
+/src/runtime-data/
+
 # dependencies
 node_modules/
 

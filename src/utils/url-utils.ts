@@ -93,7 +93,14 @@ export function getDir(path: string): string {
 }
 
 export function getFileDirFromPath(filePath: string): string {
-	return filePath.replace(/^src\//, "").replace(/\/[^/]+$/, "");
+	const normalizedPath = filePath.replace(/\\/g, "/");
+	const sourceMarker = "/src/";
+	const sourceIndex = normalizedPath.lastIndexOf(sourceMarker);
+	const sourceRelativePath =
+		sourceIndex >= 0
+			? normalizedPath.slice(sourceIndex + sourceMarker.length)
+			: normalizedPath.replace(/^src\//, "");
+	return sourceRelativePath.replace(/\/[^/]+$/, "");
 }
 
 export function url(path: string) {
