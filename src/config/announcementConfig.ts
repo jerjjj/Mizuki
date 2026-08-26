@@ -2,11 +2,11 @@ import type { AnnouncementConfig } from "../types/config";
 
 // 公告栏配置
 export const announcementConfig: AnnouncementConfig = {
-	title: "", // 公告标题，填空使用i18n字符串Key.announcement
-	content: "ブログへようこそ！これはサンプルの告知です", // 公告内容
+	title: "个人博客更新", // 公告标题，填空使用i18n字符串Key.announcement
+	content: "由于之前的个人博客系统占用资源较多,加上原服务器到期.现个人博客已经进行升级(使用了基于astro的静态博客框架),且网站托管在'热铁盒网页托管'上", // 公告内容
 	closable: true, // 允许用户关闭公告
 	link: {
-		enable: true, // 启用链接
+		enable: false, // 启用链接
 		text: "Learn More", // 链接文本
 		url: "/about/", // 链接 URL
 		external: false, // 内部链接

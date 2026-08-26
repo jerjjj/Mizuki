@@ -21,6 +21,6 @@ export const pioConfig: PioConfig = {
 		home: "Click here to go back to homepage!", // 首页提示
 		skin: ["Want to see my new outfit?", "The new outfit looks great~"], // 换装提示
 		close: "QWQ See you next time~", // 关闭提示
-		link: "https://github.com/LyraVoid/Mizuki", // 关于链接
+		link: "https://github.com/jerjjj", // 关于链接
 	},
 };
